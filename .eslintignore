@@ -1,0 +1,28 @@
+# .eslintignore
+
+# Dependencies (ignored by default, but safe to include)
+node_modules/
+
+# Production / Build artifacts
+dist/
+build/
+out/
+
+# Test coverage
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment secrets
+.env
+.env.*
+
+# IDEs and system files
+.vscode/
+.idea/
+.DS_Store
