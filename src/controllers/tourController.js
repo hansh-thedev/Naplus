@@ -203,6 +203,62 @@ const getTourStats = async (req, res, next) => {
     });
   }
 };
+
+/*==>  
+    desc: Get tour status
+    route: [GET]:   /tour-stats
+    access: private 
+ <== */
+const getMonthlyPlan = async (req, res, next) => {
+  try {
+    const year = req.params.year * 1;
+    console.log(year);
+    // @ INCOMPLETE
+    const plan = await Tour.aggregate([
+      {
+        $unwind: "$startDates", // deconstruct array elements into individual seperate docs
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: { $toDate: new Date(`${year}-01-01`) },
+            // $gte: { $toDate: new Date(`${year}-01-01`) }, // january 1st
+            // $lte: { $toDate: new Date(`${year}-12-31`) }, // december 31st
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: "$name" }, // creating an array and pushing tours name in it
+        },
+      },
+      {
+        $addFields: {
+          month: "_id", // adding new fields which displays months value
+        },
+      },
+      {
+        $project: {
+          _id: 0, // excluding _id fields from data
+        },
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+    ]);
+    res.status(200).json({
+      status: "success",
+      data: { plan },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
 module.exports = {
   getAlltours,
   updateTour,
@@ -210,4 +266,5 @@ module.exports = {
   createTour,
   deleteTour,
   getTourStats,
+  getMonthlyPlan,
 };
