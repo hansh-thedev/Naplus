@@ -91,7 +91,6 @@ const getTour = async (req, res, next) => {
       data: { tour },
     });
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       status: "fail",
       message: "Error! Cannot fetch tour",
@@ -115,7 +114,7 @@ const createTour = async (req, res, next) => {
     console.log(error);
     res.status(400).json({
       status: "fail",
-      message: "Error! Cannot create a new tour",
+      message: error,
     });
   }
 };

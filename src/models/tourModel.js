@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const validator = require("validator");
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -7,6 +8,8 @@ const tourSchema = new mongoose.Schema(
       required: [true, "A tour must have a name"],
       unique: true,
       trim: true,
+      minLength: [10, "Tour name must have greater than or equal to 10 chars"],
+      maxLength: [50, "Tour name must have less than or equal to 50 chars"],
     },
     duration: {
       type: Number,
@@ -18,12 +21,17 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
+      enum: {
+        values: ["easy", ",medium", "difficult"],
+        message: "Difficulty is either easy,medium or difficult",
+      },
       required: [true, "A tour must have difficulty"],
     },
     ratingsAverage: {
       type: Number,
       default: 1,
-      max: 5,
+      min: 1.0,
+      max: 5.0,
     },
     ratingsQuantity: {
       type: Number,
@@ -33,7 +41,15 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, "A tour must have price"],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (discount) {
+          return discount < this.price;
+        },
+        message: "Discount price ({VALUE}) should be below regular price",
+      },
+    },
     summary: {
       type: String,
       trim: true,
@@ -49,14 +65,10 @@ const tourSchema = new mongoose.Schema(
     },
     images: [String],
     slug: String,
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-      select: false,
-    },
     startDates: [Date],
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true }, // when data gets saved
     toObject: { virtuals: true }, // when data gets outputed
   },
