@@ -1,4 +1,6 @@
 const Tour = require("../models/tourModel");
+const AppError = require("../utils/appError");
+const catchAsync = require("../utils/catchAsync");
 
 class APIFeatures {
   constructor(mongoQuery, queryString) {
@@ -54,95 +56,67 @@ class APIFeatures {
     route: [GET]:   /tours 
     access: public 
  <== */
-const getAlltours = async (req, res, next) => {
-  try {
-    // EXECUTING QUERY
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const tours = await features.query;
-    res.status(200).json({
-      status: "success",
-      result: tours.length,
-      data: { tours: tours },
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      message: "Error! Cannot fetch tours",
-    });
-  }
-};
+const getAlltours = catchAsync(async (req, res, next) => {
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const tours = await features.query;
+  res.status(200).json({
+    status: "success",
+    result: tours.length,
+    data: { tours: tours },
+  });
+});
 
 /*==>  
     desc: Fetch single tour by Id
     route: [GET]:   /tours/:tourId 
     access: private 
  <== */
-const getTour = async (req, res, next) => {
+const getTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.tourId;
-  try {
-    const tour = await Tour.findById(tourId);
-    res.status(200).json({
-      status: "success",
-      data: { tour },
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Error! Cannot fetch tour",
-    });
-  }
-};
+  if (!tourId) return next(new AppError("Please provide ID", 404));
+  const tour = await Tour.findById(tourId);
+  if (!tour) return next(new AppError("No tour found with that ID", 404));
+  res.status(200).json({
+    status: "success",
+    data: { tour },
+  });
+});
 
 /*==>  
     desc: Create a new tour
     route: [POST]:   /tours 
     access: private 
  <== */
-const createTour = async (req, res, next) => {
-  try {
-    const newTour = await Tour.create(req.body);
-    res.status(200).json({
-      status: "success",
-      data: { tour: newTour },
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
+const createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+  res.status(200).json({
+    status: "success",
+    data: { tour: newTour },
+  });
+});
 
 /*==>  
     desc: Update a tour by Id
     route: [PATCH]:   /tours/:ID 
     access: private 
  <== */
-const updateTour = async (req, res, next) => {
+const updateTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.tourId;
-  if (!tourId) throw new Error("Invalid Id");
-  try {
-    const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
-      returnDocument: true,
-      runValidators: true,
-    });
-    res.status(200).json({
-      status: "success",
-      data: tour,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
+  if (!tourId) return next(new AppError("Please provide ID", 404));
+  const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
+    returnDocument: true,
+    runValidators: true,
+  });
+  if (!tour) return next(new AppError("No tour found with that ID", 404));
+  res.status(200).json({
+    status: "success",
+    data: tour,
+  });
+});
 
 /*==>  
     desc: Delete a tour by Id
@@ -150,58 +124,44 @@ const updateTour = async (req, res, next) => {
     access: private 
  <== */
 
-const deleteTour = async (req, res, next) => {
+const deleteTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.tourId;
-  try {
-    await Tour.findByIdAndDelete(tourId);
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
+  const tour = await Tour.findByIdAndDelete(tourId);
+  if (!tour) return next(new AppError("No tour found with that ID", 404));
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
 /*==>  
     desc: Get tour status
     route: [GET]:   /tour-stats
     access: private 
  <== */
 
-const getTourStats = async (req, res, next) => {
-  console.log("hitted");
-  try {
-    const stats = await Tour.aggregate([
-      { $match: { ratingsAverage: { $gte: 4.5 } } },
-      {
-        $group: {
-          _id: { $toUpper: "$difficulty" }, // groups tours according to difficulty
-          numTours: { $sum: 1 },
-          numRatings: { $sum: "$ratingsQuantity" },
-          avgRating: { $avg: "$ratingsAverage" },
-          avgPrice: { $avg: "$price" },
-          minPrice: { $avg: "$price" },
-          maxPrice: { $avg: "$price" },
-        },
+const getTourStats = catchAsync(async (req, res, next) => {
+  const stats = await Tour.aggregate([
+    { $match: { ratingsAverage: { $gte: 4.5 } } },
+    {
+      $group: {
+        _id: { $toUpper: "$difficulty" }, // groups tours according to difficulty
+        numTours: { $sum: 1 },
+        numRatings: { $sum: "$ratingsQuantity" },
+        avgRating: { $avg: "$ratingsAverage" },
+        avgPrice: { $avg: "$price" },
+        minPrice: { $avg: "$price" },
+        maxPrice: { $avg: "$price" },
       },
-      {
-        $sort: { avgPrice: 1 },
-      },
-    ]);
-    res.status(200).json({
-      status: "success",
-      data: stats,
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
+    },
+    {
+      $sort: { avgPrice: 1 },
+    },
+  ]);
+  res.status(200).json({
+    status: "success",
+    data: stats,
+  });
+});
 
 /*==>  
     desc: Get tour status
