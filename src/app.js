@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -8,11 +9,14 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 app.use(express.json());
+app.use(cookieParser());
 // ==> IMPORTS
+const authRouter = require("./routes/authRoutes");
 const tourRouter = require("./routes/tourRoutes");
 const errorHandler = require("./controllers/errorController");
 
 //==> ROUTES
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", tourRouter);
 
