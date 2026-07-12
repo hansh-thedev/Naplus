@@ -3,7 +3,7 @@
 // Here handler = function(req, res, next){do something} that will be called by express.
 const catchAsync = function (func) {
   return function (req, res, next) {
-    func(req, res, next).catch((err) => next(err));
+    func(req, res, next).catch(next);
   };
 };
 

@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "default_user.jpg",
     },
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
@@ -52,6 +53,15 @@ userSchema.pre("save", async function () {
 // Instance methods for checking if password is correct
 userSchema.methods.correctPassword = async function (password, hashedPass) {
   return await bcrypt.compare(password, hashedPass);
+};
+
+userSchema.methods.passwordChanged = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const timeChanged = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < timeChanged;
+  }
+
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);

@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const User = require("../models/userModel");
@@ -17,11 +16,19 @@ const createJWTToken = function (id) {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const { name, email, password, passwordConfirm, photo } = req.body;
-  const body = { name, email, password, photo, passwordConfirm };
+  const { name, email, password, passwordConfirm, photo, passwordChangedAt } =
+    req.body;
+  const body = {
+    name,
+    email,
+    password,
+    photo,
+    passwordConfirm,
+    passwordChangedAt,
+  };
   const newUser = await User.create(body);
 
-  //   JWT
+  //==> JWT
   const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });

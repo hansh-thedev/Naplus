@@ -11,3 +11,8 @@
 API :
 
 query: limitFields: name,price,etc , in case of multiple query they must be seperated by comma
+
+# KEY NOTES
+
+- Some validation works only for save(create) method, so while updating docs we are using doc.save() method not findByIdAndUpdate method.
+- User has passwordChangedAt field, whenever user changes password we goanna update it.
