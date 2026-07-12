@@ -13,12 +13,13 @@ app.use(cookieParser());
 // ==> IMPORTS
 const authRouter = require("./routes/authRoutes");
 const tourRouter = require("./routes/tourRoutes");
+const userRouter = require("./routes/userRoutes");
 const errorHandler = require("./controllers/errorController");
 
 //==> ROUTES
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tours", tourRouter);
-app.use("/api/v1/users", tourRouter);
+app.use("/api/v1/users", userRouter);
 
 // Handling unhandled routes.
 app.all("*", (req, res, next) => {

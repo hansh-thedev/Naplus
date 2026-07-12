@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const User = require("../models/userModel");
@@ -9,7 +10,7 @@ const User = require("../models/userModel");
  <== */
 
 const createJWTToken = function (id) {
-  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
   return token;
@@ -33,12 +34,17 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 exports.signin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+  if (!email || !password)
+    return next(new AppError("Please provide email and password", 400));
   // Checking if user exists
-  const user = await User.find({ email });
-  //   comparing password
-
+  const user = await User.findOne({ email }).select("+password");
+  //   comparing password : if now user second check will not run
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("Invalid email or password", 401));
+  }
+  const token = createJWTToken(user._id);
   res.status(201).json({
     status: "success",
-    data: { user },
+    token,
   });
 });
