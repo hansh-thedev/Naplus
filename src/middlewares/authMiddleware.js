@@ -34,3 +34,14 @@ exports.protectAuth = catchAsync(async (req, res, next) => {
   req.user = user;
   next();
 });
+exports.restrictTo = (...roles) => {
+  // roles is an array ['guide','admin']
+  return function (req, res, next) {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You don't have permission to perform this action", 403),
+      );
+    }
+    next();
+  };
+};

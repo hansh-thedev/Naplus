@@ -16,8 +16,15 @@ const createJWTToken = function (id) {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const { name, email, password, passwordConfirm, photo, passwordChangedAt } =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    passwordConfirm,
+    photo,
+    passwordChangedAt,
+    role,
+  } = req.body;
   const body = {
     name,
     email,
@@ -25,6 +32,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     photo,
     passwordConfirm,
     passwordChangedAt,
+    role,
   };
   const newUser = await User.create(body);
 
