@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,17 +37,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "default_user.jpg",
     },
-    passwordChangedAt: Date,
     role: {
       type: String,
       enum: ["admin", "user", "guide", "lead-guide"],
       default: "user",
     },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
   },
 );
+
+// changing passwordChnagedAt timestamp if password  is changed
+userSchema.pre("save", function () {
+  if (!this.isModified("password") || this.isNew) return;
+  this.passwordChangedAt = Date.now() - 1000; // removing lagtime
+});
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
@@ -67,6 +76,17 @@ userSchema.methods.passwordChanged = function (JWTTimestamp) {
   }
 
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 6 * 60 * 1000; // 6 mins
+  console.log({ resetToken }, this.passwordResetToken);
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);

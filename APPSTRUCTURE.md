@@ -16,3 +16,9 @@ query: limitFields: name,price,etc , in case of multiple query they must be sepe
 
 - Some validation works only for save(create) method, so while updating docs we are using doc.save() method not findByIdAndUpdate method.
 - User has passwordChangedAt field, whenever user changes password we goanna update it.
+
+//@ INCOMPLETE-
+
+- password reset , forgot password functionality.
+- tour stats controller
+- xss security

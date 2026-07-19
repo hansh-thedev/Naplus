@@ -22,7 +22,9 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 exports.getUser = catchAsync(async (req, res, next) => {
   const userId = req.params.userId;
   if (!userId) return next(new AppError("Please provide ID", 404));
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).select(
+    "-passwordResetExpires -passwordResetToken",
+  );
   if (!user) return next(new AppError("No user found with that ID", 404));
   res.status(200).json({
     status: "success",
