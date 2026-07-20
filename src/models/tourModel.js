@@ -87,6 +87,12 @@ const tourSchema = new mongoose.Schema(
         description: String,
       },
     ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -103,6 +109,14 @@ tourSchema.virtual("durationWeeks").get(function () {
 // Document middleware : creating slug before saving to DB
 tourSchema.pre("save", function () {
   this.slug = slugify(this.name, { lower: true });
+});
+
+//Query middleware to populate guide fields on all find methods
+tourSchema.pre(/^find/, function () {
+  this.populate({
+    path: "guides",
+    select: "_id name email photo", // selecting ony these fields from user.
+  });
 });
 
 const Tour = mongoose.model("Tour", tourSchema);
