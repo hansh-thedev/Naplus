@@ -18,7 +18,9 @@ exports.protectAuth = catchAsync(async (req, res, next) => {
   }
   //verify token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  const user = await User.findById(decoded.id);
+  const user = await User.findById(decoded.id).select(
+    "-__v -passwordResetExpires -passwordResetToken",
+  );
   if (!user)
     next(new AppError("User belonging to this token doesn't exist!", 401));
   //Checking if user changed password
@@ -44,4 +46,10 @@ exports.restrictTo = (...roles) => {
     }
     next();
   };
+};
+
+// middleware for adding userId to params so that we can fetch currently logged in user details
+exports.getMe = (req, res, next) => {
+  req.params.userId = req.user._id;
+  next();
 };

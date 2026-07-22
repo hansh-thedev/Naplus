@@ -78,7 +78,7 @@ const getAlltours = catchAsync(async (req, res, next) => {
 const getTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.tourId;
   if (!tourId) return next(new AppError("Please provide ID", 404));
-  const tour = await Tour.findById(tourId);
+  const tour = await Tour.findById(tourId).populate("reviews");
   if (!tour) return next(new AppError("No tour found with that ID", 404));
   res.status(200).json({
     status: "success",
@@ -108,7 +108,7 @@ const updateTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.tourId;
   if (!tourId) return next(new AppError("Please provide ID", 404));
   const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
-    returnDocument: true,
+    returnDocument: "after",
     runValidators: true,
   });
   if (!tour) return next(new AppError("No tour found with that ID", 404));

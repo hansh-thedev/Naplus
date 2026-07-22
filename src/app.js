@@ -38,6 +38,7 @@ app.use(
 const authRouter = require("./routes/authRoutes");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
+const reviewrRouter = require("./routes/reviewRoutes");
 const errorHandler = require("./controllers/errorController");
 
 // app.all("*", (req, res, next) => {
@@ -49,6 +50,7 @@ const errorHandler = require("./controllers/errorController");
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewrRouter);
 
 // Handling unhandled routes.
 app.all("*", (req, res, next) => {

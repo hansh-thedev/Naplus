@@ -17,8 +17,17 @@ query: limitFields: name,price,etc , in case of multiple query they must be sepe
 - Some validation works only for save(create) method, so while updating docs we are using doc.save() method not findByIdAndUpdate method.
 - User has passwordChangedAt field, whenever user changes password we goanna update it.
 
+## Routes Structure
+
+//=> Reviews:
+
+- Only authenticated users (not admin/guides/lead-guide) are allowed to create a review.
+
 //@ INCOMPLETE-
 
 - password reset , forgot password functionality.
 - tour stats controller
 - xss security
+
+- -user section
+- update details, delete account,

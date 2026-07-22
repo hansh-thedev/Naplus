@@ -106,6 +106,17 @@ tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
+// Virtually populationg reviews for each tour : only on fetching single tour
+tourSchema.virtual(
+  "reviews",
+  {
+    ref: "Review",
+    foreignField: "tour", // review model has tour field which stores tourid
+    localField: "_id",
+  },
+  function () {},
+);
+
 // Document middleware : creating slug before saving to DB
 tourSchema.pre("save", function () {
   this.slug = slugify(this.name, { lower: true });

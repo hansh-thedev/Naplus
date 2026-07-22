@@ -10,8 +10,10 @@ const {
 } = require("../controllers/tourController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { aliasTop5CheapTours } = require("../middlewares/tourMiddleware");
+const reviewRouter = require("../routes/reviewRoutes");
 
 const router = express.Router();
+router.use("/:tourId/reviews", reviewRouter); // for this route we are using review router
 
 router.route("/top-5-cheap").get(aliasTop5CheapTours, getAlltours);
 router.route("/tour-stats").get(getTourStats);

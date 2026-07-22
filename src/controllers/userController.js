@@ -15,8 +15,8 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
   });
 });
 /*==>  
-    desc: Fetch single tour by Id
-    route: [GET]:   /tours/:tourId 
+    desc: Fetch currently logged in user details
+    route: [GET]:   /me
     access: private 
  <== */
 exports.getUser = catchAsync(async (req, res, next) => {
